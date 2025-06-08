@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Vladimir
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: some_data
+      changes:
+        - sql: CREATE EXTENSION IF NOT EXISTS "pgcrypto"
+        - createTable:
+            tableName: some_data
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: value
+                  type: text
