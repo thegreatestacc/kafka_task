@@ -22,6 +22,7 @@ public class DataBaseToKafkaService {
     private final SomeDataRepository repository;
     private final KafkaTemplate<UUID, String> kafkaTemplate;
 
+    // TODO impl it after writing to db implementation
     public void publishAllToKafka() {
         repository.findAll().forEach(entity ->
                 kafkaTemplate.send(DATA_TOPIC, entity.getId(), entity.getValue())

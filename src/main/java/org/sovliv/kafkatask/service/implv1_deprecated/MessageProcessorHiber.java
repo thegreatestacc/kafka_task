@@ -1,14 +1,14 @@
-package org.sovliv.kafkatask.service;
+package org.sovliv.kafkatask.service.implv1_deprecated;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.sovliv.kafkatask.entities.SomeData;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.sovliv.kafkatask.repository.SomeDataRepository;
+import org.sovliv.kafkatask.service.DataBaseToKafkaService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +21,16 @@ import static org.sovliv.kafkatask.utils.Constants.*;
 /**
  * @author Vladimir Solovyov
  * @project KafkaTask
- * @date on 02/06/2025
+ * @date on 31/05/2025
  */
 
+@Slf4j
+//@Primary
 @Service
-@Primary
 @RequiredArgsConstructor
-public class DataBaseWriterJDBC implements DataBaseWriter {
-    private final JdbcTemplate jdbcTemplate;
+public class MessageProcessorHiber implements MessageProcessor {
+
+    private final SomeDataRepository repository;
     private final DataBaseToKafkaService dataBaseToKafkaService;
 
     private final AtomicLong counter = new AtomicLong(0);
@@ -39,12 +41,7 @@ public class DataBaseWriterJDBC implements DataBaseWriter {
     @KafkaListener(topics = DATA_TOPIC)
     public void listener(List<ConsumerRecord<UUID, String>> records) {
         for (var record : records) {
-            try {
-                dbQueue.put(new SomeData(record.key(), record.value()));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println(INTERRUPTED_WHILE_PUTTING_TO_QUEUE + e.getMessage());
-            }
+            dbQueue.offer(new SomeData(record.value()));
         }
     }
 
@@ -53,48 +50,36 @@ public class DataBaseWriterJDBC implements DataBaseWriter {
         for (int i = 0; i < WORKER_THREADS; i++) {
             executorService.submit(() -> {
                 List<SomeData> buffer = new ArrayList<>(BATCH_SIZE);
-                while (running || !dbQueue.isEmpty()) {
+
+                while (true) {
                     try {
                         SomeData data = dbQueue.poll(1, TimeUnit.SECONDS);
                         if (data != null) buffer.add(data);
 
-                        if (buffer.size() >= BATCH_SIZE || (!running && !buffer.isEmpty())) {
-                            saveBuffer(new ArrayList<>(buffer));
+                        if (buffer.size() >= BATCH_SIZE) {
+                            repository.saveAll(new ArrayList<>(buffer));
                             counter.addAndGet(buffer.size());
                             buffer.clear();
                         }
                     } catch (Exception e) {
-                        System.err.println("DB error: " + e.getMessage());
+                        log.error(DB_ERROR + "{}", e.getMessage());
                     }
                 }
             });
         }
     }
 
-    @Transactional
-    public void saveBuffer(List<SomeData> bufferToWrite) {
-        if (bufferToWrite.isEmpty()) return;
-        String sql = "INSERT INTO some_data (id, value) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
-        jdbcTemplate.batchUpdate(
-                sql,
-                bufferToWrite,
-                bufferToWrite.size(),
-                (ps, someData) -> {
-                    ps.setObject(1, someData.getId());
-                    ps.setString(2, someData.getValue());
-                }
-        );
+    public boolean isQueueDrained() {
+        return dbQueue.isEmpty();
+    }
+
+    // Завершение записи — можно вызвать вручную в конце работы
+    public void shutdownAndFlush() {
+        this.running = false;
     }
 
     public boolean isDbOverloaded() {
         return !dbQueue.isEmpty();
     }
-
-    public boolean isQueueDrained() {
-        return dbQueue.isEmpty();
-    }
-
-    public void shutdownAndFlush() {
-        this.running = false;
-    }
 }
+

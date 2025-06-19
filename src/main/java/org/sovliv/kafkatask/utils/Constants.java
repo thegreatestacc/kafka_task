@@ -29,7 +29,16 @@ public class Constants {
 
     //jdbc service
     public static final String INTERRUPTED_WHILE_PUTTING_TO_QUEUE = "Interrupted while putting to dbQueue: ";
+    public static final String INSERT_QUERY = "INSERT INTO some_data (id, value) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
+//    public static final String INSERT_QUERY = "INSERT INTO some_data (id, value) VALUES (?, ?)";
 
     //producer controller
     public static final String RESPONSE_ENTITY_BODY = "Sent %d messages.";
+
+    //Buffer manager
+    public static final int BUFFER_LIMIT = 1_000_000;
+
+    // DB writer
+    public static final String COPY_QUERY = "COPY some_data (id, value) FROM STDIN WITH (FORMAT text)";
+
 }

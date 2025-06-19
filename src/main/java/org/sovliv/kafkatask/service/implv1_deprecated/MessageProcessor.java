@@ -1,4 +1,4 @@
-package org.sovliv.kafkatask.service;
+package org.sovliv.kafkatask.service.implv1_deprecated;
 
 /**
  * @author Vladimir Solovyov
@@ -6,7 +6,7 @@ package org.sovliv.kafkatask.service;
  * @date on 03/06/2025
  */
 
-public interface DataBaseWriter {
+public interface MessageProcessor {
 
     boolean isDbOverloaded();
     void shutdownAndFlush();

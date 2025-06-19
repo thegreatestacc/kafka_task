@@ -15,9 +15,23 @@ databaseChangeLog:
               - column:
                   name: id
                   type: uuid
-                  defaultValueComputed: gen_random_uuid()
                   constraints:
-                    primaryKey: true
+                    nullable: false
               - column:
                   name: value
                   type: text
+        - addPrimaryKey:
+            tableName: some_data
+            columnNames: id
+            constraintName: some_data_pkey
+
+  - changeSet:
+      id: 2
+      author: Vladimir
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: some_data_staging
+      changes:
+        - sql: CREATE UNLOGGED TABLE some_data_staging (id uuid, value text)

@@ -8,7 +8,8 @@ services:
     ports:
       - "9092:9092"
     volumes:
-      - ./kafka-cluster/kafka-1/data:/var/lib/kafka/data
+      - kafka1-data:/var/lib/kafka/data
+
     environment:
       KAFKA_CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
       CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
@@ -41,7 +42,9 @@ services:
     ports:
       - "9094:9092"
     volumes:
-      - ./kafka-cluster/kafka-2/data:/var/lib/kafka/data
+#      - ./kafka-cluster/kafka-2/data:/var/lib/kafka/data
+      - kafka2-data:/var/lib/kafka/data
+
     environment:
       KAFKA_CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
       CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
@@ -74,7 +77,9 @@ services:
     ports:
       - "9096:9092"
     volumes:
-      - ./kafka-cluster/kafka-3/data:/var/lib/kafka/data
+#      - ./kafka-cluster/kafka-3/data:/var/lib/kafka/data
+      - kafka3-data:/var/lib/kafka/data
+
     environment:
       KAFKA_CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
       CLUSTER_ID: xe2d5Se9STyfJOLtJGruMQ
@@ -113,9 +118,7 @@ services:
       POSTGRES_MAX_CONNECTIONS: 100
     volumes:
       - ./db-init:/docker-entrypoint-initdb.d
-
-    #    volumes:
-#      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - kafka-net
 
@@ -124,5 +127,8 @@ networks:
     name: kafka-net
 
 volumes:
+  kafka1-data:
+  kafka2-data:
+  kafka3-data:
   postgres_data:
 

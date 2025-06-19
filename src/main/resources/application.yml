@@ -30,6 +30,7 @@ spring:
       session-timeout-ms: 60000
       heartbeat-interval: 15000
       max-poll-interval-ms: 600000
+      enable-auto-commit: false
 
     properties:
       # Таймауты на уровне клиента
@@ -40,6 +41,7 @@ spring:
     listener:
       type: batch
       concurrency: 10                            # можно настроить под производительность
+      ack-mode: manual
 
   datasource:
     url: jdbc:postgresql://host.docker.internal:5432/kafkatask
@@ -48,22 +50,27 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 200          # минимум 2×кол-во потоков на запись
-      minimum-idle: 10
+      minimum-idle: 40
       idle-timeout: 10000             # как быстро можно освобождать соединения
       max-lifetime: 30000             # <= PostgreSQL tcp_keepalives_idle
-      connection-timeout: 3000
+      connection-timeout: 10000
+      auto-commit: false
+      transaction-isolation: TRANSACTION_READ_COMMITTED
 #      maximum-pool-size: 40
 #      max-lifetime: 300000 # 5 минут в миллисекундах
 #      idle-timeout: 60000  # 1 минута
 
   jpa:
     hibernate:
-#      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate.jdbc.batch_size: 1000
       hibernate.order_inserts: true
       hibernate.order_updates: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+      hibernate.transaction.coordinator_class: jdbc
+      hibernate.transaction.jta.platform: enable
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 
   liquibase:
     enabled: true
@@ -77,3 +84,11 @@ server:
 logging:
   level:
     org.apache.kafka.clients.consumer.KafkaConsumer: INFO
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari.HikariPool: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
