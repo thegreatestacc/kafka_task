@@ -22,7 +22,7 @@ public class ProduceController {
 
     @PostMapping
     public ResponseEntity<String> produce(@RequestParam(defaultValue = "20000000") int count) {
-        producerService.sendMessages(count);
+        Thread.startVirtualThread(() -> producerService.sendMessages(count));
         return ResponseEntity.ok(String.format(RESPONSE_ENTITY_BODY, count));
     }
 

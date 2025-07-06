@@ -7,9 +7,9 @@ package org.sovliv.kafkatask.utils;
  */
 
 public class Constants {
-    public static final int WORKER_THREADS = 20;
+    public static final int WORKER_THREADS = 5;
     public static final int QUEUE_CAPACITY = 200_000;
-    public static final int BATCH_SIZE = 5_000;
+    public static final int BATCH_SIZE = 10_000;
     public static final int PARALLEL_BATCHES = 5;
     public static final int TPS_LIMIT = 50_000;
     public static final String DB_ERROR = "DB error: ";
@@ -30,6 +30,10 @@ public class Constants {
     //jdbc service
     public static final String INTERRUPTED_WHILE_PUTTING_TO_QUEUE = "Interrupted while putting to dbQueue: ";
     public static final String INSERT_QUERY = "INSERT INTO some_data (id, value) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
+    public static final String INSERT_FROM_STAGING = "INSERT INTO some_data (id, value) SELECT id, value FROM some_data_staging ON CONFLICT (id) DO NOTHING";
+    public static final String STAGING_INSERT = "INSERT INTO some_data_staging (id, value) VALUES (?, ?)";
+    public static final String TRUNCATE_STAGING_TABLE = "TRUNCATE TABLE some_data_staging";
+
 //    public static final String INSERT_QUERY = "INSERT INTO some_data (id, value) VALUES (?, ?)";
 
     //producer controller

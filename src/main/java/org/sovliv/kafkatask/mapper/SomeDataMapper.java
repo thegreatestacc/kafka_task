@@ -1,8 +1,9 @@
 package org.sovliv.kafkatask.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.sovliv.kafkatask.dto.SomeDataDTO;
 import org.sovliv.kafkatask.entities.SomeData;
-import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
@@ -12,10 +13,9 @@ import java.util.UUID;
  * @date on 19/06/2025
  */
 
-@Component
-public class SomeDataMapper {
+@Mapper(componentModel = "spring", imports = UUID.class)
+public interface SomeDataMapper {
 
-    public SomeData toEntity(SomeDataDTO dto) {
-        return new SomeData(UUID.randomUUID(), dto.getValue());
-    }
+    @Mapping(target = "id", expression = "java(UUID.randomUUID())")
+    SomeData toEntity(SomeDataDTO dto);
 }
