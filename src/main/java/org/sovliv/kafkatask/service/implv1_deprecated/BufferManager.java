@@ -53,7 +53,7 @@ public class BufferManager {
                 pool.submit(() -> {
                     try {
                         dbWriteLimiter.acquire();
-                        dbWriter.saveBuffer(batch);
+//                        dbWriter.saveBuffer(batch);
                     } catch (Exception e) {
                         log.error("Flush error: {}", e.getMessage());
                     } finally {

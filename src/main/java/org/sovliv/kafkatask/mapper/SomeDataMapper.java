@@ -13,7 +13,7 @@ import java.util.UUID;
  * @date on 19/06/2025
  */
 
-@Mapper(componentModel = "spring", imports = UUID.class)
+@Mapper(imports = UUID.class)
 public interface SomeDataMapper {
 
     @Mapping(target = "id", expression = "java(UUID.randomUUID())")

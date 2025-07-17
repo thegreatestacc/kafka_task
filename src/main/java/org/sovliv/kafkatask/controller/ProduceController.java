@@ -25,10 +25,5 @@ public class ProduceController {
         Thread.startVirtualThread(() -> producerService.sendMessages(count));
         return ResponseEntity.ok(String.format(RESPONSE_ENTITY_BODY, count));
     }
-
-    @GetMapping("/ping")
-    public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("pong");
-    }
 }
 

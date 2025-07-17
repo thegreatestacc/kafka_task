@@ -91,7 +91,7 @@ public class MessageProcessorJDBC implements MessageProcessor {
         while (attempts-- > 0 && !success) {
             try {
                 semaphore.acquire();
-                dbWriter.saveBuffer(dataBatch);
+//                dbWriter.saveBuffer(dataBatch);
                 counter.addAndGet(dataBatch.size());
                 success = true;
             } catch (Exception e) {
