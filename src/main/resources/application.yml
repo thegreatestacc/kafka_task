@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: kafka_task
+
+  kafka:
+    bootstrap-servers: host.docker.internal:9092,host.docker.internal:9094,host.docker.internal:9096
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      acks: all
+      enable-idempotence: true
+      linger-ms: 10
+      batch-size: 65536         # 64KB
+      buffer-memory: 134217728  # 128MB
+      max-block-ms: 300000
+      delivery-timeout-ms: 300000
+      compression-type: lz4
+      max-in-flight-requests-per-connection: 5
+      retries: 5
+
+    consumer:
+      group-id: data-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      fetch-max-bytes: 52428800                  # 50MB
+      max-partition-fetch-bytes: 5242880         # 5MB
+      max-poll-records: 20000
+      session-timeout-ms: 60000
+      heartbeat-interval: 15000
+      max-poll-interval-ms: 300000
+      enable-auto-commit: false
+      fetch-min-size: 5000
+
+    properties:
+      # Таймауты на уровне клиента
+      request.timeout.ms: 120000
+      default.api.timeout.ms: 120000
+      metadata.max.age.ms: 60000
+
+    listener:
+      type: batch
+      concurrency: 10
+      ack-mode: manual
+
+  datasource:
+    url: jdbc:postgresql://host.docker.internal:5432/kafkatask
+    username: user
+    password: pass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 30          # минимум 2×кол-во потоков на запись
+      minimum-idle: 40
+      idle-timeout: 10000             # как быстро можно освобождать соединения
+      max-lifetime: 180000             # <= PostgreSQL tcp_keepalives_idle
+      connection-timeout: 30000
+      auto-commit: false
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+#      maximum-pool-size: 40
+#      max-lifetime: 300000 # 5 минут в миллисекундах
+#      idle-timeout: 60000  # 1 минута
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.jdbc.batch_size: 5000
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+      hibernate.transaction.coordinator_class: jdbc
+      hibernate.transaction.jta.platform: enable
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yml
+#    baseline-on-migrate: true
+#    baseline-version: 1
+
+server:
+  port: 8081
+
+logging:
+  level:
+    org.apache.kafka.clients.consumer.KafkaConsumer: INFO
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari.HikariPool: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info

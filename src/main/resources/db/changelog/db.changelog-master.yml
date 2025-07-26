@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Vladimir
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: some_data
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/ddl/create_some_data.sql
+            relativeToChangelogFile: false
