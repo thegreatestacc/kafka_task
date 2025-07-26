@@ -8,30 +8,6 @@ databaseChangeLog:
           tableExists:
             tableName: some_data
       changes:
-        - sql: CREATE EXTENSION IF NOT EXISTS "pgcrypto"
-        - createTable:
-            tableName: some_data
-            columns:
-              - column:
-                  name: id
-                  type: uuid
-                  constraints:
-                    nullable: false
-              - column:
-                  name: value
-                  type: text
-        - addPrimaryKey:
-            tableName: some_data
-            columnNames: id
-            constraintName: some_data_pkey
-
-  - changeSet:
-      id: 2
-      author: Vladimir
-      preConditions:
-        onFail: MARK_RAN
-        not:
-          tableExists:
-            tableName: some_data_staging
-      changes:
-        - sql: CREATE UNLOGGED TABLE some_data_staging (id uuid, value text)
+        - sqlFile:
+            path: db/changelog/sql/ddl/create_some_data.sql
+            relativeToChangelogFile: false

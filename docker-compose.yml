@@ -122,6 +122,22 @@ services:
     networks:
       - kafka-net
 
+#для локального запуска закомментить этот контейнер
+  app:
+    build: .
+    container_name: kafka-task-app
+    ports:
+      - "8081:8081"
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - kafka-net
+
 networks:
   kafka-net:
     name: kafka-net
